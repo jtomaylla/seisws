@@ -34,7 +34,7 @@ namespace SEISWS
             if (con.State == ConnectionState.Open) con.Close();
         }
 
-       // METODOS DE CONEXION
+       // METODOS DE LOGIN
         public String InicioSesion(String login, String pass, int codLocal)
         {
             String msje = "";
