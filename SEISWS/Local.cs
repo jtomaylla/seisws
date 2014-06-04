@@ -5,7 +5,7 @@ using System.Web;
 
 namespace SEISWS
 {
-
+    //Comentario
     public class Local
     {
         public int CodigoLocal { get; set; }
