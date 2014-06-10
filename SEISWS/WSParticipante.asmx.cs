@@ -14,8 +14,8 @@ namespace SEISWS
     /// <summary>
     /// Descripción breve de ServicioClientes
     /// </summary>
-    /// [WebService(Namespace = "http://demo.sociosensalud.org.pe/")]   //puedes cambiar esta direccion
-    [WebService(Namespace = "http://70.38.64.52/")]
+    [WebService(Namespace = "http://demo.sociosensalud.org.pe/")]   //puedes cambiar esta direccion
+    ///[WebService(Namespace = "http://70.38.64.52/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     [System.ComponentModel.ToolboxItem(false)]
     // Para permitir que se llame a este servicio Web desde un script, usando ASP.NET AJAX, quite la marca de comentario de la línea siguiente. 
@@ -29,7 +29,7 @@ namespace SEISWS
         //hace referencia a la clase conexion, ahi esta la cadena de conexion y nuestros metodos
         Conexion con = new Conexion();
         DataTable dtDatos = new DataTable();
-       
+        Conexion1 con1 = new Conexion1();
 
         [WebMethod]
         public String LoginUsuario(String login, String pass, int codLocal)
@@ -366,6 +366,34 @@ namespace SEISWS
 
             cn.Close();
             return lista.ToArray();
+        }
+        [WebMethod]
+        public String ListadoFormatos(String CodigoUsuario)
+        {
+            SqlConnection cn = con1.conexion();
+
+            cn.Open();
+            string sql = "SELECT F.IdFormatoNemotecnico AS FormID " +
+                         "FROM Usuarios AS U INNER JOIN " +
+                         "Proyecto_Usuario AS PU ON U.CodigoUsuario = PU.CodigoUsuario INNER JOIN " +
+                         "RutaServicioFormato AS R ON PU.CodigoProyecto = R.CodigoProyecto INNER JOIN " +
+                         "Formato AS F ON R.IdFormato = F.IdFormato " +
+                         "WHERE F.IdTipoDeFormato = '04' AND U.CodigoUsuarioSP = '" + CodigoUsuario + "'";
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            String lstFormatos = "";
+
+            while (reader.Read())
+            {
+                lstFormatos += reader.GetString(0) + "/" ;
+            }
+
+            cn.Close();
+
+            return lstFormatos;
         }
 
     }
