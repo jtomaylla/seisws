@@ -14,7 +14,7 @@ namespace SEISWS
     /// <summary>
     /// Descripción breve de ServicioClientes
     /// </summary>
-    [WebService(Namespace = "http://70.38.64.52/")]
+    [WebService(Namespace = "http://demo.sociosensalud.org.pe/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     [System.ComponentModel.ToolboxItem(false)]
     // Para permitir que se llame a este servicio Web desde un script, usando ASP.NET AJAX, quite la marca de comentario de la línea siguiente. 
@@ -28,8 +28,6 @@ namespace SEISWS
         //hace referencia a la clase conexion, ahi esta la cadena de conexion y nuestros metodos
         Conexion con = new Conexion();
         DataTable dtDatos = new DataTable();
-        Conexion1 con1 = new Conexion1();
-
         [WebMethod]
         public String LoginUsuario(String login, String pass, int codLocal)
         {
@@ -366,35 +364,72 @@ namespace SEISWS
             cn.Close();
             return lista.ToArray();
         }
-        //[WebMethod]
-        //public String ListadoFormatos(String CodigoUsuario)
-        //{
-        //    SqlConnection cn = con1.conexion();
+        [WebMethod]
+        public String ListadoFormatos(String CodigoUsuario,int CodigoLocal, int CodigoProyecto, int CodigoGrupoVisita, int CodigoVisita)
+        {
+            SqlConnection cn = con.conexion();
+            //WHERE        (F.IdTipoDeFormato = '04') AND (U.CodigoUsuarioSP = '0') AND (PU.CodigoProyecto = 5) AND (U.CodigoLocal = 1) AND (R.CodigoVisita = 1) AND 
+            //             
+            cn.Open();
+            string sql = "SELECT F.IdFormatoNemotecnico AS FormID " +
+                         "FROM SEIS_DATA.dbo.Usuarios AS U INNER JOIN " +
+                         "SEIS_DATA.dbo.Proyecto_Usuario AS PU ON U.CodigoUsuario = PU.CodigoUsuario INNER JOIN " +
+                         "SEIS_DATA.dbo.RutaServicioFormato AS R ON PU.CodigoProyecto = R.CodigoProyecto INNER JOIN " +
+                         "SEIS_DATA.dbo.Formato AS F ON R.IdFormato = F.IdFormato " +
+                         "WHERE F.IdTipoDeFormato = '04' AND U.CodigoUsuarioSP = '" + CodigoUsuario + "' AND " +
+                            "PU.CodigoProyecto = " + CodigoProyecto + " AND U.CodigoLocal = " + CodigoLocal + " AND " +
+                            "R.CodigoVisita = " + CodigoVisita + " AND R.CodigoGrupoVisita = "+CodigoGrupoVisita;
+            SqlCommand cmd = new SqlCommand(sql, cn);
 
-        //    cn.Open();
-        //    string sql = "SELECT F.IdFormatoNemotecnico AS FormID " +
-        //                 "FROM Usuarios AS U INNER JOIN " +
-        //                 "Proyecto_Usuario AS PU ON U.CodigoUsuario = PU.CodigoUsuario INNER JOIN " +
-        //                 "RutaServicioFormato AS R ON PU.CodigoProyecto = R.CodigoProyecto INNER JOIN " +
-        //                 "Formato AS F ON R.IdFormato = F.IdFormato " +
-        //                 "WHERE F.IdTipoDeFormato = '04' AND U.CodigoUsuarioSP = '" + CodigoUsuario + "'";
+            SqlDataReader reader = cmd.ExecuteReader();
 
-        //    SqlCommand cmd = new SqlCommand(sql, cn);
+            String lstFormatos = "";
 
-        //    SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                lstFormatos += reader.GetString(0) + "/";
+            }
 
-        //    String lstFormatos = "";
+            cn.Close();
 
-        //    while (reader.Read())
-        //    {
-        //        lstFormatos += reader.GetString(0) + "/" ;
-        //    }
+            return lstFormatos;
+        }
+        [WebMethod]
+        public Visitas1[] ListadoVisitas1(string CodigoPaciente)
+        {
+            SqlConnection cn = con.conexion();
+            cn.Open();
+           string sql = "SELECT PY.Nombre AS Proyecto, E.Nombre AS Visita, " +
+                "SUBSTRING(DATENAME(dw, V.FechaVisita), 1, 3) + ' ' + CONVERT(varchar(10), V.FechaVisita, 103) AS FechaVisita," +
+                "CONVERT(varchar(5), V.HoraInicio, 108) AS HoraCita, EC.Descripcion AS EstadoVisita ,CONVERT(varchar(5), V.CodigoProyecto, 103) AS CodigoProyecto," + 
+                "CONVERT(varchar(5), V.CodigoGrupoVisita, 103) AS CodigoGrupoVisita,CONVERT(varchar(5), V.CodigoVisita, 103) AS CodigoVisita " +
+                "FROM  VISITAS AS V INNER JOIN PROYECTO AS PY ON V.CodigoProyecto = PY.CodigoProyecto AND V.Estado = 1 " +
+                "INNER JOIN VISITA AS E ON V.CodigoProyecto = E.CodigoProyecto AND V.CodigoGrupoVisita = E.CodigoGrupoVisita AND V.CodigoVisita = E.CodigoVisita " +
+                "INNER JOIN PARAMETROS AS EC ON V.CodigoEstadoVisita = EC.CodigoParametro AND EC.Codigo = 5 " +
+                "WHERE V.CodigoPaciente = '" + CodigoPaciente + "'";
 
-        //    cn.Close();
+            SqlCommand cmd = new SqlCommand(sql, cn);
 
-        //    return lstFormatos;
-        //}
+            SqlDataReader reader = cmd.ExecuteReader();
 
+            List<Visitas1> lista = new List<Visitas1>();
+
+            while (reader.Read())
+            {
+                lista.Add(new Visitas1(
+                    reader.GetString(0),
+                    reader.GetString(1),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    reader.GetString(4),
+                    reader.GetString(5),
+                    reader.GetString(6),
+                    reader.GetString(7)));
+            }
+
+            cn.Close();
+            return lista.ToArray();
+        }
     }
 }
 
