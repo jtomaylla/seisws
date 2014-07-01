@@ -15,7 +15,7 @@ namespace SEISWS
         public string CodigoProyecto { get; set; }
         public string CodigoGrupoVisita { get; set; }
         public string CodigoVisita { get; set; }
-
+        public string CodigoVisitas { get; set; }
         public Visitas1()
         {
             this.Proyecto = "";
@@ -26,7 +26,7 @@ namespace SEISWS
             this.CodigoProyecto = "";
             this.CodigoGrupoVisita = "";
             this.CodigoVisita = "";
-
+            this.CodigoVisitas = "";
         }
 
         public Visitas1(
@@ -37,7 +37,8 @@ namespace SEISWS
             string EstadoVisita,
             string CodigoProyecto,
             string CodigoGrupoVisita,
-            string CodigoVisita
+            string CodigoVisita,
+            string CodigoVisitas
             )
         {
             this.Proyecto = Proyecto;
@@ -48,7 +49,7 @@ namespace SEISWS
             this.CodigoProyecto = CodigoProyecto;
             this.CodigoGrupoVisita = CodigoGrupoVisita;
             this.CodigoVisita = CodigoVisita;
-
+            this.CodigoVisitas = CodigoVisitas;
         }
     }
 

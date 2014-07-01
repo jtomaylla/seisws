@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <publishData>
   <publishProfile publishUrl="ftp://demo.sociosensalud.org.pe/SEISWS" deleteExistingFiles="False" ftpAnonymousLogin="False" ftpPassiveMode="True" msdeploySite="" msdeploySiteID="" msdeployRemoteSitePhysicalPath="" msdeployAllowUntrustedCertificate="False" msdeploySkipExtraFilesOnServer="True" msdeployMarkAsApp="False" profileName="SEISWS" publishMethod="FTP" replaceMatchingFiles="True" userName="jtomaylla" savePWD="True" userPWD="AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAOl4HRz01wEOVZBqX+WgbvQAAAAACAAAAAAAQZgAAAAEAACAAAABgHT0Z1o4C+yYfjbFLhtcd4uSQx1Xi8Chz7Q8s4YefiQAAAAAOgAAAAAIAACAAAABHanw5RLSmH+0EM1B/nuYuxs+IfqPrc62eI8fj5bztxCAAAACmadcXJOj6SI/rRZ6R3G+2nCk1X2ZnQc63qlK7Qfjn6EAAAABrlIx9zlM/4wBaeePF1RIYkDbgulnsGvEeFNVCjug7QIYfq++2F67EhRdJh06BH5kY/AuXJerGxoOSo/YiGu0y" SelectedForPublish="True">
-    <file relUrl="bin/SEISWS.pdb" publishTime="06/23/2014 16:47:34" />
-    <file relUrl="bin/SEISWS.dll" publishTime="06/23/2014 16:47:34" />
-    <file relUrl="Web.config" publishTime="06/23/2014 14:49:28" />
+    <file relUrl="bin/SEISWS.pdb" publishTime="07/01/2014 12:57:37" />
+    <file relUrl="bin/SEISWS.dll" publishTime="07/01/2014 12:57:37" />
+    <file relUrl="Web.config" publishTime="07/01/2014 13:59:06" />
     <file relUrl="WSParticipante.asmx" publishTime="03/26/2014 10:49:48" />
   </publishProfile>
   <publishProfile publishUrl="ftp://70.38.64.52/SEISWS" deleteExistingFiles="False" ftpAnonymousLogin="False" ftpPassiveMode="True" msdeploySite="" msdeploySiteID="" msdeployRemoteSitePhysicalPath="" msdeployAllowUntrustedCertificate="False" msdeploySkipExtraFilesOnServer="True" msdeployMarkAsApp="False" profileName="WSiWeb" publishMethod="FTP" replaceMatchingFiles="True" userName="jtomaylla" savePWD="True" userPWD="AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAOl4HRz01wEOVZBqX+WgbvQAAAAACAAAAAAAQZgAAAAEAACAAAAAIiJQB3ZKkVrYEBrPck57Jn8BU1js1pdnHEton0lvuaQAAAAAOgAAAAAIAACAAAAD3lpRLwH/uUwsqVNYI8D7WG7qT0dNsxrwd6lHy0avq6SAAAABpXmNVGdwzeg0G6/dEi012Z9e3cQfpM6nb/3UaHTuI4UAAAAAFX1UicaDWTRrScgF+0TLimdMEqZHLYQwXQ5ylS+ELZ8esudefUaxgs+4m0G+uLMJPkBdOTqJV9Z+ud00Ivj84" SelectedForPublish="False">
