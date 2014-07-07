@@ -14,7 +14,7 @@ namespace SEISWS
     /// <summary>
     /// Descripción breve de ServicioClientes
     /// </summary>
-    [WebService(Namespace = "http://demo.sociosensalud.org.pe/")]
+    [WebService(Namespace = "http://70.38.64.52/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     [System.ComponentModel.ToolboxItem(false)]
     // Para permitir que se llame a este servicio Web desde un script, usando ASP.NET AJAX, quite la marca de comentario de la línea siguiente. 
