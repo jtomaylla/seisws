@@ -63,6 +63,7 @@
     <Content Include="WSParticipante.asmx" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Idreg.cs" />
     <Compile Include="Visitas1.cs" />
     <Compile Include="Login.cs" />
     <Compile Include="Visita.cs" />

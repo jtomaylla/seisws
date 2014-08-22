@@ -6,3 +6,4 @@ C:\Users\User\documents\visual studio 2010\Projects\SEISWS\SEISWS\bin\SEISWS.dll
 C:\Users\User\documents\visual studio 2010\Projects\SEISWS\SEISWS\bin\SEISWS.pdb
 C:\Users\User\documents\visual studio 2010\Projects\SEISWS\SEISWS\obj\Debug\SEISWS.dll
 C:\Users\User\documents\visual studio 2010\Projects\SEISWS\SEISWS\obj\Debug\SEISWS.pdb
+C:\Users\User\documents\visual studio 2010\Projects\SEISWS\SEISWS\obj\Debug\SEISWS.csprojResolveAssemblyReference.cache

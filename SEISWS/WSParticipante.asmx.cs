@@ -14,7 +14,8 @@ namespace SEISWS
     /// <summary>
     /// Descripción breve de ServicioClientes
     /// </summary>
-    [WebService(Namespace = "http://70.38.64.52/")]
+    [WebService(Namespace = "http://demo.sociosensalud.org.pe/")]
+    ///[WebService(Namespace = "http://70.38.64.52/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     [System.ComponentModel.ToolboxItem(false)]
     // Para permitir que se llame a este servicio Web desde un script, usando ASP.NET AJAX, quite la marca de comentario de la línea siguiente. 
@@ -474,8 +475,156 @@ namespace SEISWS
                 return -1;
             }
         }
+        [WebMethod]
+        public Idreg[] MostrarTipoId(int CodigoLocal, int CodigoProyecto, String CodigoPaciente)
+        {
+            DataTable dt = new DataTable();
+            dt = this.ListarDatosxPaciente(CodigoLocal, CodigoProyecto, CodigoPaciente);
+            List<Idreg> lista = new List<Idreg>();
+            if (dt.Rows.Count > 0)
+            {
+                String vPaciente = dt.Rows[0]["NombreCompleto"].ToString();
+                int vTipoTAM = Convert.ToInt32(dt.Rows[0]["TipoTAM"].ToString());
+                String vIdTAM = dt.Rows[0]["IdTAM"].ToString();
+                int vTipoENR = Convert.ToInt32(dt.Rows[0]["TipoENR"].ToString());
+                String vIdENR = dt.Rows[0]["IdENR"].ToString();
+                //if (vTipoENR == 2)
+                //{
+                //    msj = "auto";
+                //}
+                //if (vTipoENR == 0 || vTipoENR == 1)
+                //{
+                //    msj = "manual";
+                //}
+                lista.Add(new Idreg(
+                    vPaciente,
+                    vTipoTAM,
+                    vIdTAM,
+                    vTipoENR,
+                    vIdENR));
+            }
+            return lista.ToArray();
+        }
+        [WebMethod]
+        public string AsignarID_ENR(int TipoENR, int CodigoLocal, int CodigoProyecto, String CodigoPaciente, String IdENR, int CodigoUsuario)
+        {
+            DataTable dtRegistro = new DataTable();
+            string msje = "";
+            if (TipoENR == 0 || TipoENR == 1)
+            {
+                dtRegistro = this.RegistrarIdENR(CodigoLocal, CodigoProyecto, CodigoPaciente, IdENR, CodigoUsuario);
+            }
+            if (TipoENR == 2)
+            {
+                dtRegistro = this.RegistrarIdENRauto(CodigoLocal, CodigoProyecto, CodigoPaciente, CodigoUsuario);
+            }
+            if (dtRegistro.Rows.Count > 0)
+            {
+                if (dtRegistro.Rows[0]["Respuesta"].ToString() == "3")
+                {
+                    msje = "El ID se asignó correctamente...";
+                }
+                if (dtRegistro.Rows[0]["Respuesta"].ToString() == "1")
+                {
+                    msje = dtRegistro.Rows[0]["Texto"].ToString();
+                }
+            }
+            return msje;
+        }
 
+        [WebMethod]
+        public string AsignarID_TAM(int TipoTAM, int CodigoLocal, int CodigoProyecto, String CodigoPaciente, String IdTAM, int CodigoUsuario)
+        {
+            DataTable dtRegistro = new DataTable();
+            string msje = "";
+            if (TipoTAM == 0 || TipoTAM == 1)
+            {
+                dtRegistro = this.RegistrarIdENR(CodigoLocal, CodigoProyecto, CodigoPaciente, IdTAM, CodigoUsuario);
+            }
+            if (TipoTAM == 2)
+            {
+                dtRegistro = this.RegistrarIdENRauto(CodigoLocal, CodigoProyecto, CodigoPaciente, CodigoUsuario);
+            }
+            if (dtRegistro.Rows.Count > 0)
+            {
+                if (dtRegistro.Rows[0]["Respuesta"].ToString() == "3")
+                {
+                    msje = "El ID se asignó correctamente...";
+                }
+                if (dtRegistro.Rows[0]["Respuesta"].ToString() == "1")
+                {
+                    msje = dtRegistro.Rows[0]["Texto"].ToString();
+                }
+            }
+            return msje;
+        }
+        public DataTable RegistrarIdENRauto(int CodigoLocal, int CodigoProyecto, string CodigoPaciente, int IdUsuario)
+        {
+            SqlConnection cn = con.conexion();
+            SqlDataAdapter dap = new SqlDataAdapter("SPI_ID_ENR_AUTO", cn);
+            DataTable dt = new DataTable();
+            dap.SelectCommand.CommandType = CommandType.StoredProcedure;
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoLocal", CodigoLocal);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoProyecto", CodigoProyecto);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoPaciente", CodigoPaciente);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoUsuario", IdUsuario);
+            dap.Fill(dt);
+            return dt;
+        }
 
+        public DataTable RegistrarIdENR(int CodigoLocal, int CodigoProyecto, string CodigoPaciente, string IdENR, int IdUsuario)
+        {
+            SqlConnection cn = con.conexion();
+            SqlDataAdapter dap = new SqlDataAdapter("SPI_ID_ENR", cn);
+            DataTable dt = new DataTable();
+            dap.SelectCommand.CommandType = CommandType.StoredProcedure;
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoLocal", CodigoLocal);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoProyecto", CodigoProyecto);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoPaciente", CodigoPaciente);
+            dap.SelectCommand.Parameters.AddWithValue("@IdENR", IdENR);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoUsuario", IdUsuario);
+            dap.Fill(dt);
+            return dt;
+        }
+        public DataTable RegistrarIdTAMauto(int CodigoLocal, int CodigoProyecto, string CodigoPaciente, int IdUsuario)
+        {
+            SqlConnection cn = con.conexion();
+            SqlDataAdapter dap = new SqlDataAdapter("SPI_ID_TAM_AUTO", cn);
+            DataTable dt = new DataTable();
+            dap.SelectCommand.CommandType = CommandType.StoredProcedure;
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoLocal", CodigoLocal);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoProyecto", CodigoProyecto);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoPaciente", CodigoPaciente);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoUsuario", IdUsuario);
+            dap.Fill(dt);
+            return dt;
+        }
+        public DataTable RegistrarIdTAM(int CodigoLocal, int CodigoProyecto, string CodigoPaciente, string IdTAM, int IdUsuario)
+        {
+            SqlConnection cn = con.conexion();
+            SqlDataAdapter dap = new SqlDataAdapter("SPI_ID_TAM", cn);
+            DataTable dt = new DataTable();
+            dap.SelectCommand.CommandType = CommandType.StoredProcedure;
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoLocal", CodigoLocal);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoProyecto", CodigoProyecto);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoPaciente", CodigoPaciente);
+            dap.SelectCommand.Parameters.AddWithValue("@IdENR", IdTAM);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoUsuario", IdUsuario);
+            dap.Fill(dt);
+            return dt;
+        }
+        public DataTable ListarDatosxPaciente(int CodigoLocal, int CodigoProyecto, string CodigoPaciente)
+        {
+            SqlConnection cn = con.conexion();
+            SqlDataAdapter dap = new SqlDataAdapter("SPS_CABECERA", cn);
+            DataTable dt = new DataTable();
+            dap.SelectCommand.CommandType = CommandType.StoredProcedure;
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoLocal", CodigoLocal);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoProyecto", CodigoProyecto);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoPaciente", CodigoPaciente);
+            dap.Fill(dt);
+            return dt;
+        }
     }
 }
 
