@@ -432,6 +432,7 @@ namespace SEISWS
             cn.Close();
             return lista.ToArray();
         }
+
         [WebMethod]
         public int EstadoVisita(int CodigoLocal, int CodigoProyecto, int CodigoVisita, int CodigoVisitas, 
             string CodigoPaciente, int CodigoEstadoVisita, int CodigoEstatusPaciente,int CodigoUsuario)
@@ -476,6 +477,38 @@ namespace SEISWS
             }
         }
         [WebMethod]
+        public lstId[] ListadoIds(string CodigoPaciente, string CodigoUsuario)
+        {
+            SqlConnection cn = con.conexion();
+            cn.Open();
+            string sql = "SELECT PY.Nombre AS Proyecto, " +
+                 "CASE WHEN ct.Numero IS NULL THEN '' ELSE ct.Numero END AS IdTAM, " +
+                 "CASE WHEN ce.Numero IS NULL THEN '' ELSE ce.Numero END AS IdENR " +
+                 "FROM dbo.USUARIOS_PROYECTO U " +
+                 "INNER JOIN PROYECTO AS PY ON U.CodigoProyecto = PY.CodigoProyecto AND U.Estado=1 " + 
+                 "INNER JOIN PACIENTE_LOCAL_PROYECTO PP ON PY.CodigoProyecto = PP.CodigoProyecto " + 
+                 "LEFT JOIN PACIENTE_COD_TAM ct on ct.CodigoTAM=PP.CodigoTAM " +
+                 "LEFT JOIN PACIENTE_COD_ENR ce on ce.CodigoENR=PP.CodigoENR " + 
+                 "WHERE PP.CodigoPaciente = '" + CodigoPaciente + "' AND U.CodigoUsuario = " + CodigoUsuario;
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<lstId> lista = new List<lstId>();
+
+            while (reader.Read())
+            {
+                lista.Add(new lstId(
+                    reader.GetString(0),
+                    reader.GetString(1),
+                    reader.GetString(2)));
+            }
+
+            cn.Close();
+            return lista.ToArray();
+        }
+        [WebMethod]
         public Idreg[] MostrarTipoId(int CodigoLocal, int CodigoProyecto, String CodigoPaciente)
         {
             DataTable dt = new DataTable();
@@ -488,14 +521,8 @@ namespace SEISWS
                 String vIdTAM = dt.Rows[0]["IdTAM"].ToString();
                 int vTipoENR = Convert.ToInt32(dt.Rows[0]["TipoENR"].ToString());
                 String vIdENR = dt.Rows[0]["IdENR"].ToString();
-                //if (vTipoENR == 2)
-                //{
-                //    msj = "auto";
-                //}
-                //if (vTipoENR == 0 || vTipoENR == 1)
-                //{
-                //    msj = "manual";
-                //}
+                //if (vTipoENR == 2) msj = "auto";
+                //if (vTipoENR == 0 || vTipoENR == 1) msj = "manual";
                 lista.Add(new Idreg(
                     vPaciente,
                     vTipoTAM,
@@ -522,7 +549,7 @@ namespace SEISWS
             {
                 if (dtRegistro.Rows[0]["Respuesta"].ToString() == "3")
                 {
-                    msje = "El ID se asignó correctamente...";
+                    msje = "El ID se asigno correctamente...";
                 }
                 if (dtRegistro.Rows[0]["Respuesta"].ToString() == "1")
                 {
@@ -539,17 +566,17 @@ namespace SEISWS
             string msje = "";
             if (TipoTAM == 0 || TipoTAM == 1)
             {
-                dtRegistro = this.RegistrarIdENR(CodigoLocal, CodigoProyecto, CodigoPaciente, IdTAM, CodigoUsuario);
+                dtRegistro = this.RegistrarIdTAM(CodigoLocal, CodigoProyecto, CodigoPaciente, IdTAM, CodigoUsuario);
             }
             if (TipoTAM == 2)
             {
-                dtRegistro = this.RegistrarIdENRauto(CodigoLocal, CodigoProyecto, CodigoPaciente, CodigoUsuario);
+                dtRegistro = this.RegistrarIdTAMauto(CodigoLocal, CodigoProyecto, CodigoPaciente, CodigoUsuario);
             }
             if (dtRegistro.Rows.Count > 0)
             {
                 if (dtRegistro.Rows[0]["Respuesta"].ToString() == "3")
                 {
-                    msje = "El ID se asignó correctamente...";
+                    msje = "El ID se asigno correctamente...";
                 }
                 if (dtRegistro.Rows[0]["Respuesta"].ToString() == "1")
                 {
@@ -608,7 +635,7 @@ namespace SEISWS
             dap.SelectCommand.Parameters.AddWithValue("@CodigoLocal", CodigoLocal);
             dap.SelectCommand.Parameters.AddWithValue("@CodigoProyecto", CodigoProyecto);
             dap.SelectCommand.Parameters.AddWithValue("@CodigoPaciente", CodigoPaciente);
-            dap.SelectCommand.Parameters.AddWithValue("@IdENR", IdTAM);
+            dap.SelectCommand.Parameters.AddWithValue("@IdTAM", IdTAM);
             dap.SelectCommand.Parameters.AddWithValue("@CodigoUsuario", IdUsuario);
             dap.Fill(dt);
             return dt;
