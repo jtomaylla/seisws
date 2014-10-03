@@ -476,12 +476,13 @@ namespace SEISWS
                 return -1;
             }
         }
+
         [WebMethod]
         public lstId[] ListadoIds(string CodigoPaciente, string CodigoUsuario)
         {
             SqlConnection cn = con.conexion();
             cn.Open();
-            string sql = "SELECT PY.Nombre AS Proyecto, " +
+            string sql = "SELECT CONVERT(varchar(5), U.CodigoProyecto, 103) AS CodigoProyecto,PY.Nombre AS Proyecto, " +
                  "CASE WHEN ct.Numero IS NULL THEN '' ELSE ct.Numero END AS IdTAM, " +
                  "CASE WHEN ce.Numero IS NULL THEN '' ELSE ce.Numero END AS IdENR " +
                  "FROM dbo.USUARIOS_PROYECTO U " +
@@ -502,12 +503,14 @@ namespace SEISWS
                 lista.Add(new lstId(
                     reader.GetString(0),
                     reader.GetString(1),
-                    reader.GetString(2)));
+                    reader.GetString(2),
+                    reader.GetString(3)));
             }
 
             cn.Close();
             return lista.ToArray();
         }
+
         [WebMethod]
         public Idreg[] MostrarTipoId(int CodigoLocal, int CodigoProyecto, String CodigoPaciente)
         {
@@ -532,6 +535,7 @@ namespace SEISWS
             }
             return lista.ToArray();
         }
+
         [WebMethod]
         public string AsignarID_ENR(int TipoENR, int CodigoLocal, int CodigoProyecto, String CodigoPaciente, String IdENR, int CodigoUsuario)
         {
