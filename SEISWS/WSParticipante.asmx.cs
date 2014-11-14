@@ -14,8 +14,8 @@ namespace SEISWS
     /// <summary>
     /// Descripción breve de ServicioClientes
     /// </summary>
-    [WebService(Namespace = "http://demo.sociosensalud.org.pe/")]
-    ///[WebService(Namespace = "http://70.38.64.52/")]
+    ///[WebService(Namespace = "http://demo.sociosensalud.org.pe/")]
+    [WebService(Namespace = "http://70.38.64.52/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     [System.ComponentModel.ToolboxItem(false)]
     // Para permitir que se llame a este servicio Web desde un script, usando ASP.NET AJAX, quite la marca de comentario de la línea siguiente. 
@@ -249,7 +249,32 @@ namespace SEISWS
 
             return lista.ToArray();
         }
+        [WebMethod]
+        public Proyecto[] ListadoProyectos1(int CodigoLocal,int CodigoUsuario)
+        {
+            SqlConnection cn = con.conexion();
 
+            cn.Open();
+            SqlDataAdapter dap = new SqlDataAdapter("SPS_PROYECTOS_X_LOCAL_X_USUARIO", cn);
+            DataTable dt = new DataTable();
+            dap.SelectCommand.CommandType = CommandType.StoredProcedure;
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoLocal", CodigoLocal);
+            dap.SelectCommand.Parameters.AddWithValue("@CodigoUsuario", CodigoUsuario);
+            dap.Fill(dt);
+
+            DataTableReader reader = dt.CreateDataReader();
+
+            List<Proyecto> lista = new List<Proyecto>();
+
+            while (reader.Read())
+            {
+                lista.Add(new Proyecto(reader.GetInt32(0), reader.GetString(1)));
+            }
+
+            cn.Close();
+
+            return lista.ToArray();
+        }
         [WebMethod]
         public Visita[] ListadoGrupoVisitas(string CodigoPaciente, int CodigoLocal, int CodigoProyecto)
         {
@@ -434,6 +459,45 @@ namespace SEISWS
         }
 
         [WebMethod]
+        public Visitas1[] ListadoVisitas2(string CodigoPaciente, string CodigoUsuario)
+        {
+            SqlConnection cn = con.conexion();
+            cn.Open();
+            string sql = "SELECT PY.Nombre AS Proyecto, E.Nombre AS Visita, " +
+                 "SUBSTRING(DATENAME(dw, V.FechaVisita), 1, 3) + ' ' + CONVERT(varchar(10), V.FechaVisita, 103) AS FechaVisita," +
+                 "CONVERT(varchar(5), V.HoraInicio, 108) AS HoraCita, EC.Descripcion AS EstadoVisita ,CONVERT(varchar(5), V.CodigoProyecto, 103) AS CodigoProyecto," +
+                 "CONVERT(varchar(5), V.CodigoGrupoVisita, 103) AS CodigoGrupoVisita,CONVERT(varchar(5), V.CodigoVisita, 103) AS CodigoVisita, CONVERT(varchar(5), V.CodigoVisitas, 103) AS CodigoVisitas " +
+                 "FROM  VISITAS AS V INNER JOIN PROYECTO AS PY ON V.CodigoProyecto = PY.CodigoProyecto AND V.Estado = 1 " +
+                 "INNER JOIN USUARIOS_PROYECTO AS UP ON UP.CodigoProyecto = V.CodigoProyecto " +
+                 "INNER JOIN VISITA AS E ON V.CodigoProyecto = E.CodigoProyecto AND V.CodigoGrupoVisita = E.CodigoGrupoVisita AND V.CodigoVisita = E.CodigoVisita " +
+                 "INNER JOIN PARAMETROS AS EC ON V.CodigoEstadoVisita = EC.CodigoParametro AND EC.Codigo = 5 " +
+                 "WHERE V.CodigoPaciente = '" + CodigoPaciente + "' AND UP.CodigoUsuario = " + CodigoUsuario;
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<Visitas1> lista = new List<Visitas1>();
+
+            while (reader.Read())
+            {
+                lista.Add(new Visitas1(
+                    reader.GetString(0),
+                    reader.GetString(1),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    reader.GetString(4),
+                    reader.GetString(5),
+                    reader.GetString(6),
+                    reader.GetString(7),
+                    reader.GetString(8)));
+            }
+
+            cn.Close();
+            return lista.ToArray();
+        }
+        
+        [WebMethod]
         public int EstadoVisita(int CodigoLocal, int CodigoProyecto, int CodigoVisita, int CodigoVisitas, 
             string CodigoPaciente, int CodigoEstadoVisita, int CodigoEstatusPaciente,int CodigoUsuario)
         {
@@ -488,8 +552,8 @@ namespace SEISWS
                  "FROM dbo.USUARIOS_PROYECTO U " +
                  "INNER JOIN PROYECTO AS PY ON U.CodigoProyecto = PY.CodigoProyecto AND U.Estado=1 " + 
                  "INNER JOIN PACIENTE_LOCAL_PROYECTO PP ON PY.CodigoProyecto = PP.CodigoProyecto " + 
-                 "LEFT JOIN PACIENTE_COD_TAM ct on ct.CodigoTAM=PP.CodigoTAM " +
-                 "LEFT JOIN PACIENTE_COD_ENR ce on ce.CodigoENR=PP.CodigoENR " + 
+                 "LEFT JOIN PACIENTE_COD_TAM ct on ct.CodigoTAM=PP.CodigoTAM AND ct.CodigoLocal=PP.CodigoLocal AND ct.CodigoProyecto=PP.CodigoProyecto " +
+                 "LEFT JOIN PACIENTE_COD_ENR ce on ce.CodigoENR=PP.CodigoENR AND ce.CodigoLocal=PP.CodigoLocal AND ce.CodigoProyecto=PP.CodigoProyecto " +
                  "WHERE PP.CodigoPaciente = '" + CodigoPaciente + "' AND U.CodigoUsuario = " + CodigoUsuario;
 
             SqlCommand cmd = new SqlCommand(sql, cn);
@@ -656,6 +720,58 @@ namespace SEISWS
             dap.Fill(dt);
             return dt;
         }
+        [WebMethod]
+        public int InsertarGeoPoint(
+            string Latitud,
+            string Longitud, 
+            string Fecha,
+            string Hora,
+            int CodigoUsuario,
+            string CodigoDispositivo,
+            int TransicionGeofence,
+            int CodigoGeofence)
+        {
+            SqlConnection cn = con.conexion();
+            SqlCommand cmd = new SqlCommand("SPI_GEOPOINT", cn);
+            SqlTransaction trx;
+            int intretorno;
+            string strRespuesta;
+
+            try
+            {
+                cn.Open();
+                trx = cn.BeginTransaction();
+                cmd.Transaction = trx;
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@Latitud", SqlDbType.VarChar, 50)).Value = Latitud;
+                cmd.Parameters.Add(new SqlParameter("@Longitud", SqlDbType.VarChar, 50)).Value = Longitud;
+                cmd.Parameters.Add(new SqlParameter("@Fecha", SqlDbType.VarChar, 10)).Value = Fecha;
+                cmd.Parameters.Add(new SqlParameter("@Hora", SqlDbType.VarChar, 5)).Value = Hora;
+                cmd.Parameters.Add(new SqlParameter("@CodigoUsuario", SqlDbType.Int)).Value = CodigoUsuario;
+                cmd.Parameters.Add(new SqlParameter("@CodigoDispositivo", SqlDbType.VarChar, 50)).Value = CodigoDispositivo;
+                cmd.Parameters.Add(new SqlParameter("@CodigoGeofence", SqlDbType.Int)).Value = CodigoGeofence;
+                cmd.Parameters.Add(new SqlParameter("@TransicionGeofence", SqlDbType.Int)).Value = TransicionGeofence;
+                cmd.Transaction = trx;
+                intretorno = cmd.ExecuteNonQuery();
+                trx.Commit();
+                cn.Close();
+                return intretorno;
+            }
+            catch (SqlException sqlException)
+            {
+                strRespuesta = sqlException.Message.ToString();
+                cn.Close();
+                return -1;
+            }
+            catch (Exception exception)
+            {
+                strRespuesta = exception.Message.ToString();
+                cn.Close();
+                return -1;
+            }
+        }
+
+
     }
 }
 
