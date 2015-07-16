@@ -185,6 +185,52 @@ namespace SEISWS
             return lista.ToArray();
         }
 
+        [WebMethod]
+        public Geofence[] ListadoGeofences()
+        {
+            SqlConnection cn = con.conexion();
+
+            cn.Open();
+
+            string sql = "SELECT G.CodigoGeofence, G.CodigoLocal, L.Nombre, G.Latitud, G.Longitud, G.Radio, G.DuracionExpiracion, G.TipoTransicion "+
+                "FROM GEOFENCE AS G INNER JOIN "+
+                "LOCAL AS L ON G.CodigoLocal = L.CodigoLocal ";
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<Geofence> lista = new List<Geofence>();
+            Geofence geo = new Geofence();
+            geo.codigogeofence = 0;
+            geo.codigolocal = 0;
+            geo.nombre = "Seleccione Local";
+            geo.latitud = "";
+            geo.longitud = "";
+            geo.radio = "";
+            geo.duracionexpiracion = "";
+            geo.tipotransicion = 0;
+
+            lista.Add(geo);
+
+            while (reader.Read())
+            {
+                lista.Add(new Geofence(
+                    reader.GetInt32(0),
+                    reader.GetInt32(1),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    reader.GetString(4),
+                    reader.GetString(5),
+                    reader.GetString(6),
+                    reader.GetInt32(7)
+                    ));
+            }
+
+            cn.Close();
+
+            return lista.ToArray();
+        }
         public DataTable RegistrarPacientes(string Nombres, string ApellidoP, string ApellidoM, int CodigoTipoDocumento, string DocumentoIdentidad, string FechaNacimiento, int Sexo)
         {
             SqlConnection cn = con.conexion();
@@ -391,7 +437,7 @@ namespace SEISWS
             return lista.ToArray();
         }
         [WebMethod]
-        public String ListadoFormatos(String CodigoUsuario,int CodigoLocal, int CodigoProyecto, int CodigoGrupoVisita, int CodigoVisita)
+        public String ListadoFormatos(String CodigoUsuario, int CodigoLocal, int CodigoProyecto, int CodigoGrupoVisita, int CodigoVisita)
         {
             SqlConnection cn = con.conexion();
             //WHERE        (F.IdTipoDeFormato = '04') AND (U.CodigoUsuarioSP = '0') AND (PU.CodigoProyecto = 5) AND (U.CodigoLocal = 1) AND (R.CodigoVisita = 1) AND 
@@ -404,7 +450,7 @@ namespace SEISWS
                          "SEIS_DATA.dbo.Formato AS F ON R.IdFormato = F.IdFormato " +
                          "WHERE F.IdTipoDeFormato = '04' AND U.CodigoUsuarioSP = '" + CodigoUsuario + "' AND " +
                             "PU.CodigoProyecto = " + CodigoProyecto + " AND U.CodigoLocal = " + CodigoLocal + " AND " +
-                            "R.CodigoVisita = " + CodigoVisita + " AND R.CodigoGrupoVisita = "+CodigoGrupoVisita;
+                            "R.CodigoVisita = " + CodigoVisita + " AND R.CodigoGrupoVisita = " + CodigoGrupoVisita;
             SqlCommand cmd = new SqlCommand(sql, cn);
 
             SqlDataReader reader = cmd.ExecuteReader();
@@ -420,6 +466,37 @@ namespace SEISWS
 
             return lstFormatos;
         }
+        [WebMethod]
+        public String ListadoFormatos1(String CodigoUsuario, int CodigoLocal, int CodigoProyecto)
+        {
+            SqlConnection cn = con.conexion();
+            //WHERE        (F.IdTipoDeFormato = '04') AND (U.CodigoUsuarioSP = '0') AND (PU.CodigoProyecto = 5) AND (U.CodigoLocal = 1) 
+            //             
+            cn.Open();
+            string sql = "SELECT F.IdFormatoNemotecnico AS FormID " +
+                         "FROM SEIS_DATA.dbo.Usuarios AS U INNER JOIN " +
+                         "SEIS_DATA.dbo.Proyecto_Usuario AS PU ON U.CodigoUsuario = PU.CodigoUsuario INNER JOIN " +
+                         "SEIS_DATA.dbo.RutaServicioFormato AS R ON PU.CodigoProyecto = R.CodigoProyecto INNER JOIN " +
+                         "SEIS_DATA.dbo.Formato AS F ON R.IdFormato = F.IdFormato " +
+                         "WHERE F.IdTipoDeFormato = '04' AND U.CodigoUsuarioSP = '" + CodigoUsuario + "' AND " +
+                         "PU.CodigoProyecto = " + CodigoProyecto + " AND U.CodigoLocal = " + CodigoLocal;
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            String lstFormatos = "";
+
+            while (reader.Read())
+            {
+                lstFormatos += reader.GetString(0) + "/";
+            }
+
+            cn.Close();
+
+            return lstFormatos;
+        }
+
         [WebMethod]
         public Visitas1[] ListadoVisitas1(string CodigoPaciente)
         {
@@ -496,7 +573,46 @@ namespace SEISWS
             cn.Close();
             return lista.ToArray();
         }
-        
+
+        [WebMethod]
+        public Visitas1[] ListadoVisitas3(string CodigoPaciente, string CodigoUsuario, string CodigoProyecto)
+        {
+            SqlConnection cn = con.conexion();
+            cn.Open();
+            string sql = "SELECT PY.Nombre AS Proyecto, E.Nombre AS Visita, " +
+                 "SUBSTRING(DATENAME(dw, V.FechaVisita), 1, 3) + ' ' + CONVERT(varchar(10), V.FechaVisita, 103) AS FechaVisita," +
+                 "CONVERT(varchar(5), V.HoraInicio, 108) AS HoraCita, EC.Descripcion AS EstadoVisita ,CONVERT(varchar(5), V.CodigoProyecto, 103) AS CodigoProyecto," +
+                 "CONVERT(varchar(5), V.CodigoGrupoVisita, 103) AS CodigoGrupoVisita,CONVERT(varchar(5), V.CodigoVisita, 103) AS CodigoVisita, CONVERT(varchar(5), V.CodigoVisitas, 103) AS CodigoVisitas " +
+                 "FROM  VISITAS AS V INNER JOIN PROYECTO AS PY ON V.CodigoProyecto = PY.CodigoProyecto AND V.Estado = 1 " +
+                 "INNER JOIN USUARIOS_PROYECTO AS UP ON UP.CodigoProyecto = V.CodigoProyecto " +
+                 "INNER JOIN VISITA AS E ON V.CodigoProyecto = E.CodigoProyecto AND V.CodigoGrupoVisita = E.CodigoGrupoVisita AND V.CodigoVisita = E.CodigoVisita " +
+                 "INNER JOIN PARAMETROS AS EC ON V.CodigoEstadoVisita = EC.CodigoParametro AND EC.Codigo = 5 " +
+                 "WHERE V.CodigoPaciente = '" + CodigoPaciente + "' AND UP.CodigoUsuario = " + CodigoUsuario + " AND V.CodigoProyecto = " + CodigoProyecto;
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<Visitas1> lista = new List<Visitas1>();
+
+            while (reader.Read())
+            {
+                lista.Add(new Visitas1(
+                    reader.GetString(0),
+                    reader.GetString(1),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    reader.GetString(4),
+                    reader.GetString(5),
+                    reader.GetString(6),
+                    reader.GetString(7),
+                    reader.GetString(8)));
+            }
+
+            cn.Close();
+            return lista.ToArray();
+        }
+
         [WebMethod]
         public int EstadoVisita(int CodigoLocal, int CodigoProyecto, int CodigoVisita, int CodigoVisitas, 
             string CodigoPaciente, int CodigoEstadoVisita, int CodigoEstatusPaciente,int CodigoUsuario)
@@ -771,6 +887,56 @@ namespace SEISWS
             }
         }
 
+        [WebMethod]
+        public int EstadoENR_TAM(string Tipo,int CodigoProyecto)
+        {
+
+            int intretorno = -1;
+            string strRespuesta;
+
+            SqlConnection cn = con.conexion();
+            try
+            {
+                cn.Open();
+
+                string sql = "SELECT ENR,TAM " +
+                    "FROM PROYECTO " +
+                    "WHERE estado=1 AND CodigoProyecto = " + CodigoProyecto;
+
+                SqlCommand cmd = new SqlCommand(sql, cn);
+
+                SqlDataReader reader = cmd.ExecuteReader();
+                reader.Read();
+                if (Tipo == "ENR")
+                {
+                    intretorno = reader.GetInt32(0);
+                }
+                else
+                {
+                    if (Tipo == "TAM")
+                    {
+                        intretorno = reader.GetInt32(1);
+                    }
+                }
+                cn.Close();
+
+                return intretorno;
+
+            }
+            catch (SqlException sqlException)
+            {
+                strRespuesta = sqlException.Message.ToString();
+                cn.Close();
+                return -1;
+            }
+            catch (Exception exception)
+            {
+                strRespuesta = exception.Message.ToString();
+                cn.Close();
+                return -1;
+            }
+
+        }
 
     }
 }

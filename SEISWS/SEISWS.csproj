@@ -63,6 +63,7 @@
     <Content Include="WSParticipante.asmx" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Geofence.cs" />
     <Compile Include="lstId.cs" />
     <Compile Include="Idreg.cs" />
     <Compile Include="Visitas1.cs" />
